@@ -78,6 +78,10 @@ export function Component() {
           value={search}
           onChange={setSearch}
           onSubmit={() => void submitSearch(search)}
+          onClear={() => {
+            setSearch("")
+            void submitSearch("")
+          }}
           addLabel="Add new machine"
           onAdd={() => navigate("new")}
         />

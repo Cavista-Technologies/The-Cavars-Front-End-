@@ -92,6 +92,10 @@ export function Component() {
           value={searchInput}
           onChange={setSearchInput}
           onSubmit={() => void setSearch(searchInput)}
+          onClear={() => {
+            setSearchInput("")
+            void setSearch("")
+          }}
         />
       </Box>
 

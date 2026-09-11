@@ -139,10 +139,14 @@ export function Component() {
 
       <Box mb="4">
         <SearchToolbar
-          placeholder="Search tickets..."
+          placeholder="Search by ticket number..."
           value={search}
           onChange={setSearch}
           onSubmit={() => void submitSearch(search)}
+          onClear={() => {
+            setSearch("")
+            void submitSearch("")
+          }}
           addLabel="New ticket"
           onAdd={() => navigate("new")}
         />
