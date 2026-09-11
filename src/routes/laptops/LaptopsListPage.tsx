@@ -19,28 +19,16 @@ export function Component() {
     hasPreviousPage,
     hasNextPage,
     goToPage,
+    search: submittedSearch,
+    setSearch: submitSearch,
   } = useLaptops();
   const navigate = useNavigate();
   const params = useParams();
-  const [search, setSearchState] = React.useState("");
-  const setSearch = (value: string) => {
-    setSearchState(value);
-    void goToPage(1);
-  };
+  const [search, setSearch] = React.useState(submittedSearch);
 
   if (role !== "it") {
     return <Navigate to="/tickets" replace />;
   }
-
-  const filtered = laptops.filter((l) => {
-    if (!search) return true;
-    const q = search.toLowerCase();
-    return (
-      l.assetName.toLowerCase().includes(q) ||
-      l.model.toLowerCase().includes(q) ||
-      (l.assignedToName ?? "").toLowerCase().includes(q)
-    );
-  });
 
   const counts = {
     available: laptops.filter(
@@ -89,6 +77,7 @@ export function Component() {
           placeholder="Search laptops..."
           value={search}
           onChange={setSearch}
+          onSubmit={() => void submitSearch(search)}
           addLabel="Add new machine"
           onAdd={() => navigate("new")}
         />
@@ -111,7 +100,7 @@ export function Component() {
             </Table.Row>
           </Table.Header>
           <Table.Body>
-            {filtered.map((laptop) => (
+            {laptops.map((laptop) => (
               <Table.Row
                 key={laptop.id}
                 onClick={() => navigate(laptop.id)}
@@ -138,7 +127,7 @@ export function Component() {
                 </Table.Cell>
               </Table.Row>
             ))}
-            {filtered.length === 0 && (
+            {laptops.length === 0 && (
               <Table.Row>
                 <Table.Cell colSpan={5}>
                   <Text

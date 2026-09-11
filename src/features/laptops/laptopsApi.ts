@@ -66,6 +66,18 @@ export async function getLaptops(
   return data;
 }
 
+export async function searchLaptops(
+  search: string,
+  pageNumber = 1,
+  pageSize = 20,
+): Promise<PaginatedListOfUserLaptop> {
+  const { data } = await apiClient.get<PaginatedListOfUserLaptop>(
+    `/api/laptop/?searchString=${encodeURIComponent(search)}`,
+    { params: { pageNumber, pageSize } },
+  );
+  return data;
+}
+
 export async function getCurrentUserLaptops(
   pageNumber = 1,
   pageSize = 20,
@@ -77,9 +89,7 @@ export async function getCurrentUserLaptops(
   return data;
 }
 
-export async function createLaptop(
-  input: CreateLaptopInput,
-): Promise<string> {
+export async function createLaptop(input: CreateLaptopInput): Promise<string> {
   const { receipt, ...laptopData } = input;
   const formData = new FormData();
 

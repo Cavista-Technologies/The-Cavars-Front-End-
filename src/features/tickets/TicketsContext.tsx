@@ -9,6 +9,8 @@ import {
   createTicket as createTicketApi,
   getCurrentUserTickets,
   getTickets,
+  searchCurrentUserTickets,
+  searchTickets,
   updateTicketStatus,
   type RemoteTicket,
 } from "./ticketsApi";
@@ -30,6 +32,7 @@ interface TicketsState {
   totalPages: number;
   hasPreviousPage: boolean;
   hasNextPage: boolean;
+  search: string;
 }
 
 type TicketsAction =
@@ -41,6 +44,7 @@ type TicketsAction =
       totalPages: number;
       hasPreviousPage: boolean;
       hasNextPage: boolean;
+      search: string;
     }
   | { type: "error"; error: string };
 
@@ -57,6 +61,7 @@ function reducer(state: TicketsState, action: TicketsAction): TicketsState {
         totalPages: action.totalPages,
         hasPreviousPage: action.hasPreviousPage,
         hasNextPage: action.hasNextPage,
+        search: action.search,
       };
     case "error":
       return { ...state, status: "error", error: action.error };
@@ -73,6 +78,8 @@ interface TicketsContextValue {
   status: TicketsState["status"];
   error: string | null;
   refresh: () => Promise<void>;
+  search: string;
+  setSearch: (search: string) => Promise<void>;
   pageIndex: number;
   totalPages: number;
   hasPreviousPage: boolean;
@@ -100,9 +107,11 @@ export function TicketsProvider({ children }: { children: React.ReactNode }) {
       totalPages: persisted.totalPages ?? 1,
       hasPreviousPage: persisted.hasPreviousPage ?? false,
       hasNextPage: persisted.hasNextPage ?? false,
+      search: persisted.search ?? "",
     };
   });
   const pageRef = React.useRef(1);
+  const searchRef = React.useRef(state.search);
 
   React.useEffect(() => {
     saveState(STORAGE_KEY, state);
@@ -170,8 +179,11 @@ export function TicketsProvider({ children }: { children: React.ReactNode }) {
       pageRef.current = requestedPage;
       dispatch({ type: "loading" });
       try {
-        const response =
-          role === "it"
+        const response = searchRef.current.trim()
+          ? role === "it"
+            ? await searchTickets(searchRef.current.trim(), requestedPage, PAGE_SIZE)
+            : await searchCurrentUserTickets(searchRef.current.trim(), requestedPage, PAGE_SIZE)
+          : role === "it"
             ? await getTickets(requestedPage, PAGE_SIZE)
             : await getCurrentUserTickets(requestedPage, PAGE_SIZE);
         dispatch({
@@ -181,6 +193,7 @@ export function TicketsProvider({ children }: { children: React.ReactNode }) {
           totalPages: response.totalPages,
           hasPreviousPage: response.hasPreviousPage,
           hasNextPage: response.hasNextPage,
+          search: searchRef.current,
         });
       } catch (err) {
         dispatch({ type: "error", error: getErrorMessage(err) });
@@ -200,6 +213,14 @@ export function TicketsProvider({ children }: { children: React.ReactNode }) {
       if (nextPage === pageRef.current && stateRef.current.status === "loaded")
         return;
       await refresh(nextPage);
+    },
+    [refresh],
+  );
+
+  const setSearch = React.useCallback(
+    async (search: string) => {
+      searchRef.current = search.trim();
+      await refresh(1);
     },
     [refresh],
   );
@@ -241,6 +262,7 @@ export function TicketsProvider({ children }: { children: React.ReactNode }) {
     () => ({
       ...state,
       refresh,
+      setSearch,
       goToPage,
       createTicket,
       claimTicket,
@@ -250,6 +272,7 @@ export function TicketsProvider({ children }: { children: React.ReactNode }) {
     [
       state,
       refresh,
+      setSearch,
       goToPage,
       createTicket,
       claimTicket,

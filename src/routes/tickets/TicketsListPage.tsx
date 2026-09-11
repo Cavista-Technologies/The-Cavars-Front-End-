@@ -28,16 +28,14 @@ export function Component() {
     hasPreviousPage,
     hasNextPage,
     goToPage,
+    search: submittedSearch,
+    setSearch: submitSearch,
   } = useTickets();
   const { laptops } = useLaptops();
   const navigate = useNavigate();
   const params = useParams();
   const [tab, setTab] = React.useState("all");
-  const [search, setSearchState] = React.useState("");
-  const setSearch = (value: string) => {
-    setSearchState(value);
-    void goToPage(1);
-  };
+  const [search, setSearch] = React.useState(submittedSearch);
   const handleTabChange = (value: string) => {
     setTab(value);
     void goToPage(1);
@@ -58,11 +56,6 @@ export function Component() {
         console.log(t?.assignedToEmail, user?.email);
         return false;
       }
-      if (
-        search &&
-        !(t.title ?? "").toLowerCase().includes(search.toLowerCase())
-      )
-        return false;
       return true;
     })
     .sort((a, b) => dateValue(b.createdAt) - dateValue(a.createdAt));
@@ -149,6 +142,7 @@ export function Component() {
           placeholder="Search tickets..."
           value={search}
           onChange={setSearch}
+          onSubmit={() => void submitSearch(search)}
           addLabel="New ticket"
           onAdd={() => navigate("new")}
         />

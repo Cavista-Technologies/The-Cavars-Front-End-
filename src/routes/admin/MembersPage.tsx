@@ -32,6 +32,7 @@ export function Component() {
   const [lastName, setLastName] = React.useState("")
   const [submitting, setSubmitting] = React.useState(false)
   const [selectedUser, setSelectedUser] = React.useState<User | null>(null)
+  const [searchInput, setSearchInput] = React.useState(search)
 
   if (role !== "it") return <Navigate to="/tickets" replace />
 
@@ -86,7 +87,12 @@ export function Component() {
       </form>
 
       <Box mb="4">
-        <SearchToolbar placeholder="Search members..." value={search} onChange={setSearch} />
+        <SearchToolbar
+          placeholder="Search members..."
+          value={searchInput}
+          onChange={setSearchInput}
+          onSubmit={() => void setSearch(searchInput)}
+        />
       </Box>
 
       {status === "loading" && (

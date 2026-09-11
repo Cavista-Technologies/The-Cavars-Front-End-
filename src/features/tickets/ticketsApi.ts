@@ -40,6 +40,18 @@ export async function getTickets(
   return data;
 }
 
+export async function searchTickets(
+  search: string,
+  pageNumber = 1,
+  pageSize = 20,
+): Promise<PaginatedListOfTicket> {
+  const { data } = await apiClient.get<PaginatedListOfTicket>(
+    `/api/tickets/?searchString=${encodeURIComponent(search)}`,
+    { params: { pageNumber, pageSize } },
+  );
+  return data;
+}
+
 export async function getCurrentUserTickets(
   pageNumber = 1,
   pageSize = 20,
@@ -49,6 +61,18 @@ export async function getCurrentUserTickets(
     {
       params: { pageNumber, pageSize },
     },
+  );
+  return data;
+}
+
+export async function searchCurrentUserTickets(
+  search: string,
+  pageNumber = 1,
+  pageSize = 20,
+): Promise<PaginatedListOfTicket> {
+  const { data } = await apiClient.get<PaginatedListOfTicket>(
+    `/api/tickets/current-user/searchString?=${encodeURIComponent(search)}`,
+    { params: { pageNumber, pageSize } },
   );
   return data;
 }
