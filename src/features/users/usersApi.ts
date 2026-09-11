@@ -55,11 +55,11 @@ export async function getCurrentUser(): Promise<CurrentUser> {
 export async function createUser(
   input: CreateUserInput,
 ): Promise<CreateUserResponse> {
-  const { data } = await apiClient.post<CreateUserResponse>("/api/users", {
+  const { data } = await apiClient.post<CreateUserResponse>("/api/user", {
     email: input.email,
     firstName: input.firstName,
     lastName: input.lastName,
-    middleName: input.middleName ?? null,
+    middleName: input.middleName?.trim() || null,
     role: input.role ?? 0,
   });
   return data;

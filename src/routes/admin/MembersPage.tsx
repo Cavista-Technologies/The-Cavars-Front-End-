@@ -1,5 +1,5 @@
 import * as React from "react"
-import { Box, Button, HStack, Input, Spinner, Table, Text } from "@chakra-ui/react"
+import { Box, Button, HStack, Input, NativeSelect, Spinner, Table, Text } from "@chakra-ui/react"
 import { Navigate } from "react-router"
 import { useRole } from "../../auth/useRole"
 import { SearchToolbar } from "../../components/common/SearchToolbar"
@@ -30,6 +30,8 @@ export function Component() {
   const [email, setEmail] = React.useState("")
   const [firstName, setFirstName] = React.useState("")
   const [lastName, setLastName] = React.useState("")
+  const [middleName, setMiddleName] = React.useState("")
+  const [memberRole, setMemberRole] = React.useState("0")
   const [submitting, setSubmitting] = React.useState(false)
   const [selectedUser, setSelectedUser] = React.useState<User | null>(null)
   const [searchInput, setSearchInput] = React.useState(search)
@@ -41,11 +43,19 @@ export function Component() {
     if (!email.trim() || !firstName.trim() || !lastName.trim()) return
     setSubmitting(true)
     try {
-      await createMember({ email: email.trim(), firstName: firstName.trim(), lastName: lastName.trim() })
+      await createMember({
+        email: email.trim(),
+        firstName: firstName.trim(),
+        lastName: lastName.trim(),
+        middleName: middleName.trim(),
+        role: Number(memberRole),
+      })
       toaster.create({ type: "success", title: "Member added" })
       setEmail("")
       setFirstName("")
       setLastName("")
+      setMiddleName("")
+      setMemberRole("0")
     } catch (err) {
       toaster.create({ type: "error", title: "Couldn't add member", description: getErrorMessage(err) })
     } finally {
@@ -80,6 +90,14 @@ export function Component() {
           <Input value={email} onChange={(event) => setEmail(event.target.value)} placeholder="name@company.com" type="email" flex="1" minW="48" />
           <Input value={firstName} onChange={(event) => setFirstName(event.target.value)} placeholder="First name" flex="1" minW="32" />
           <Input value={lastName} onChange={(event) => setLastName(event.target.value)} placeholder="Last name" flex="1" minW="32" />
+          <Input value={middleName} onChange={(event) => setMiddleName(event.target.value)} placeholder="Middle name (optional)" flex="1" minW="40" />
+          <NativeSelect.Root flex="1" minW="40">
+            <NativeSelect.Field value={memberRole} onChange={(event) => setMemberRole(event.target.value)}>
+              <option value="0">Non-IT member</option>
+              <option value="1">IT member</option>
+            </NativeSelect.Field>
+            <NativeSelect.Indicator />
+          </NativeSelect.Root>
           <Button type="submit" colorPalette="orange" loading={submitting}>
             Add
           </Button>
