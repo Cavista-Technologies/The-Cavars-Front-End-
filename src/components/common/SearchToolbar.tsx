@@ -1,25 +1,51 @@
 import { Button, HStack, Input, InputGroup } from "@chakra-ui/react"
-import { LuPlus, LuSearch } from "react-icons/lu"
+import { LuPlus, LuSearch, LuX } from "react-icons/lu"
 
 interface SearchToolbarProps {
   placeholder: string
   value: string
   onChange: (value: string) => void
+  onSubmit?: () => void
+  onClear?: () => void
   addLabel?: string
   onAdd?: () => void
 }
 
-export function SearchToolbar({ placeholder, value, onChange, addLabel, onAdd }: SearchToolbarProps) {
+export function SearchToolbar({
+  placeholder,
+  value,
+  onChange,
+  onSubmit,
+  onClear,
+  addLabel,
+  onAdd,
+}: SearchToolbarProps) {
   return (
-    <HStack justify="space-between" gap="3">
-      <InputGroup maxW="sm" startElement={<LuSearch />}>
-        <Input placeholder={placeholder} value={value} onChange={(e) => onChange(e.target.value)} />
-      </InputGroup>
+    <form
+      onSubmit={(event) => {
+        event.preventDefault()
+        onSubmit?.()
+      }}
+      style={{ display: "flex", justifyContent: "space-between", gap: "0.75rem", width: "100%" }}
+    >
+      <HStack gap="2">
+        <InputGroup maxW="sm" startElement={<LuSearch />}>
+          <Input placeholder={placeholder} value={value} onChange={(e) => onChange(e.target.value)} />
+        </InputGroup>
+        <Button type="submit" variant="outline">
+          <LuSearch /> Search
+        </Button>
+        {value.length > 0 && (
+          <Button type="button" variant="ghost" onClick={onClear}>
+            <LuX /> Clear search
+          </Button>
+        )}
+      </HStack>
       {onAdd && (
-        <Button colorPalette="orange" onClick={onAdd}>
+        <Button type="button" colorPalette="orange" onClick={onAdd}>
           <LuPlus /> {addLabel}
         </Button>
       )}
-    </HStack>
+    </form>
   )
 }

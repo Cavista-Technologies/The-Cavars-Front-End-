@@ -4,6 +4,7 @@ import type { RemoteLaptopHistory } from "./types";
 export interface RemoteUserLaptop {
   id: string;
   userId: string | null;
+  laptopNumber: string;
   assetName: string;
   model: string;
   comment: string;
@@ -33,6 +34,7 @@ export interface PaginatedListOfUserLaptop {
 }
 
 export interface CreateLaptopInput {
+  laptopNumber: string;
   assetName: string;
   model: string;
   comment: string;
@@ -40,7 +42,7 @@ export interface CreateLaptopInput {
   employeeDepartment: string;
   price: number;
   currency: string;
-  receipt?: File | null;
+  receipt?: string | null;
   estimationUsefulLifeYear: string;
   depreciationEstimationDate: string;
   warrantyExpirationDate: string;
@@ -66,6 +68,18 @@ export async function getLaptops(
   return data;
 }
 
+export async function searchLaptops(
+  search: string,
+  pageNumber = 1,
+  pageSize = 20,
+): Promise<PaginatedListOfUserLaptop> {
+  const { data } = await apiClient.get<PaginatedListOfUserLaptop>(
+    `/api/laptops/?searchString=${encodeURIComponent(search)}`,
+    { params: { pageNumber, pageSize } },
+  );
+  return data;
+}
+
 export async function getCurrentUserLaptops(
   pageNumber = 1,
   pageSize = 20,
@@ -77,23 +91,10 @@ export async function getCurrentUserLaptops(
   return data;
 }
 
-export async function createLaptop(
-  input: CreateLaptopInput,
-): Promise<string> {
-  const { receipt, ...laptopData } = input;
-  const formData = new FormData();
-
-  Object.entries(laptopData).forEach(([key, value]) => {
-    formData.append(key, String(value));
-  });
-
-  if (receipt) {
-    formData.append("receipt", receipt);
-  }
-
+export async function createLaptop(input: CreateLaptopInput): Promise<string> {
   const { data } = await apiClient.post<{ laptopId: string }>(
     "/api/laptops/create",
-    formData,
+    input,
   );
   return data.laptopId;
 }

@@ -7,6 +7,7 @@ import { useMembers } from "../users/MembersContext"
 import {
   createLaptop,
   getLaptops,
+  searchLaptops,
   updateLaptop,
   type CreateLaptopInput,
   type RemoteUserLaptop,
@@ -32,6 +33,7 @@ interface LaptopsState {
   totalPages: number
   hasPreviousPage: boolean
   hasNextPage: boolean
+  search: string
 }
 
 type LaptopsAction =
@@ -43,6 +45,7 @@ type LaptopsAction =
       totalPages: number
       hasPreviousPage: boolean
       hasNextPage: boolean
+      search: string
     }
   | { type: "error"; error: string }
   | { type: "add"; laptop: Laptop }
@@ -70,6 +73,7 @@ function reducer(state: LaptopsState, action: LaptopsAction): LaptopsState {
         totalPages: action.totalPages,
         hasPreviousPage: action.hasPreviousPage,
         hasNextPage: action.hasNextPage,
+        search: action.search,
       }
     case "error":
       return { ...state, status: "error", error: action.error }
@@ -122,6 +126,8 @@ interface LaptopsContextValue {
   status: LaptopsState["status"]
   error: string | null
   refresh: (page?: number) => Promise<void>
+  search: string
+  setSearch: (search: string) => Promise<void>
   pageIndex: number
   totalPages: number
   hasPreviousPage: boolean
@@ -152,9 +158,11 @@ export function LaptopsProvider({ children }: { children: React.ReactNode }) {
       totalPages: persisted.totalPages ?? 1,
       hasPreviousPage: persisted.hasPreviousPage ?? false,
       hasNextPage: persisted.hasNextPage ?? false,
+      search: persisted.search ?? "",
     }
   })
   const pageRef = React.useRef(1)
+  const searchRef = React.useRef(state.search)
 
   React.useEffect(() => {
     saveState(STORAGE_KEY, state)
@@ -172,6 +180,7 @@ export function LaptopsProvider({ children }: { children: React.ReactNode }) {
         const owner = r.userId ? users.find((u) => u.id === r.userId) : undefined
         return {
           id: r.id,
+          laptopNumber: r.laptopNumber,
           assetName: r.assetName,
           model: r.model,
           comment: r.comment,
@@ -216,13 +225,16 @@ export function LaptopsProvider({ children }: { children: React.ReactNode }) {
         totalPages: 1,
         hasPreviousPage: false,
         hasNextPage: false,
+        search: searchRef.current,
       })
       return
     }
     pageRef.current = requestedPage
     dispatch({ type: "loading" })
     try {
-      const response = await getLaptops(requestedPage, PAGE_SIZE)
+      const response = searchRef.current.trim()
+        ? await searchLaptops(searchRef.current.trim(), requestedPage, PAGE_SIZE)
+        : await getLaptops(requestedPage, PAGE_SIZE)
       dispatch({
         type: "loaded",
         laptops: normalize(response.item),
@@ -230,6 +242,7 @@ export function LaptopsProvider({ children }: { children: React.ReactNode }) {
         totalPages: response.totalPages,
         hasPreviousPage: response.hasPreviousPage,
         hasNextPage: response.hasNextPage,
+        search: searchRef.current,
       })
     } catch (err) {
       dispatch({ type: "error", error: getErrorMessage(err) })
@@ -246,6 +259,14 @@ export function LaptopsProvider({ children }: { children: React.ReactNode }) {
       const nextPage = Math.max(1, Math.min(page, stateRef.current.totalPages))
       if (nextPage === pageRef.current && stateRef.current.status === "loaded") return
       await refresh(nextPage)
+    },
+    [refresh],
+  )
+
+  const setSearch = React.useCallback(
+    async (search: string) => {
+      searchRef.current = search.trim()
+      await refresh(1)
     },
     [refresh],
   )
@@ -320,8 +341,8 @@ export function LaptopsProvider({ children }: { children: React.ReactNode }) {
   )
 
   const value = React.useMemo(
-    () => ({ ...state, refresh, goToPage, addLaptop, assignLaptop, unassignLaptop, setLaptopStatus }),
-    [state, refresh, goToPage, addLaptop, assignLaptop, unassignLaptop, setLaptopStatus],
+    () => ({ ...state, refresh, goToPage, setSearch, addLaptop, assignLaptop, unassignLaptop, setLaptopStatus }),
+    [state, refresh, goToPage, setSearch, addLaptop, assignLaptop, unassignLaptop, setLaptopStatus],
   )
 
   return <LaptopsContext.Provider value={value}>{children}</LaptopsContext.Provider>

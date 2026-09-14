@@ -95,6 +95,7 @@ export function conditionLabel(condition: number): string {
 export interface Laptop {
   /** = the owning user's userID — the backend has no separate laptop id, and it's confirmed one laptop per user. */
   id: string;
+  laptopNumber: string;
   assetName: string;
   model: string;
   comment: string;

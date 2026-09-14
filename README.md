@@ -54,8 +54,9 @@ Sign-in will fail with a console error if `VITE_OIDC_AUTHORITY`/`VITE_OIDC_CLIEN
 ## Feature areas (`src/features/*`, `src/routes/*`)
 
 - **Tickets** — employees raise tickets against their laptop; IT can see and claim/resolve every ticket. Visibility is scoped server-side: IT calls `GET /api/tickets` (all tickets), everyone else calls `GET /api/tickets/current-user`.
-- **Laptops** — the full asset inventory (IT-only list/detail/create) plus a "My laptop" card sourced directly from the current-user API for the signed-in employee.
-- **Users/Members** — the IT-only member directory (`/admin/members`) for adding people and toggling IT access.
+- **Laptops** — the full asset inventory (IT-only list/detail/create) plus a "My laptop" card sourced directly from the current-user API for the signed-in employee. The inventory search uses the server-side laptop search endpoint.
+- **Users/Members** — the IT-only member directory (`/admin/members`) for adding people and toggling IT access. Member search uses the server-side users search endpoint.
+- **Search** — laptop, member, and ticket searches submit on Enter and retain server-side pagination. Ticket status and assignment tabs remain client-side filters over the returned page.
 - **Notifications** — a lightweight, client-side-only notification feed (e.g. "ticket claimed") surfaced via the bell icon.
 
 Each feature follows the same pattern: an `xApi.ts` file wrapping typed Axios calls, an `XContext.tsx` provider (`useReducer` + `status: "idle" | "loading" | "loaded" | "error"`) exposing a `useX()` hook, and routes/components that consume it. Data that the backend doesn't support yet (e.g. ticket comments, laptop assignment history) is layered on top as a local overlay persisted to `localStorage` — see the comments in `TicketsContext.tsx` and `LaptopsContext.tsx` for exactly which fields are local-only.

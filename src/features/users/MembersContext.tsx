@@ -101,7 +101,10 @@ export function MembersProvider({ children }: { children: React.ReactNode }) {
   }, [loadPage])
 
   const goToPage = React.useCallback((page: number) => loadPage(page, state.search), [loadPage, state.search])
-  const setSearch = React.useCallback((search: string) => loadPage(1, search), [loadPage])
+  const setSearch = React.useCallback(
+    (search: string) => loadPage(1, search.trim()),
+    [loadPage],
+  )
 
   const createMember = React.useCallback(async (input: CreateUserInput) => {
     await createUser(input)
