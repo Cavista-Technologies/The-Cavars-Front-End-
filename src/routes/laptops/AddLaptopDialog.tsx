@@ -16,6 +16,21 @@ import { getErrorMessage } from "../../lib/errors"
 
 const CURRENCY_OPTIONS = [ "NGN","USD", "GBP", "EUR"]
 
+function fileToDataUrl(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = () => {
+      if (typeof reader.result === "string") {
+        resolve(reader.result)
+      } else {
+        reject(new Error("Receipt could not be converted to a data URL"))
+      }
+    }
+    reader.onerror = () => reject(reader.error ?? new Error("Receipt could not be read"))
+    reader.readAsDataURL(file)
+  })
+}
+
 export function Component() {
   const navigate = useNavigate()
   const { addLaptop } = useLaptops()
@@ -43,6 +58,7 @@ export function Component() {
     if (!assetName.trim() || !model.trim() || !comment.trim()) return
     setSubmitting(true)
     try {
+      const receiptDataUrl = receipt ? await fileToDataUrl(receipt) : null
       await addLaptop({
         assetName: assetName.trim(),
         model: model.trim(),
@@ -51,7 +67,7 @@ export function Component() {
         employeeDepartment: employeeDepartment.trim(),
         price: Number(price) || 0,
         currency,
-        receipt,
+        receipt: receiptDataUrl,
         estimationUsefulLifeYear: toIso(estimationUsefulLifeYear),
         depreciationEstimationDate: toIso(depreciationEstimationDate),
         warrantyExpirationDate: toIso(warrantyExpirationDate),

@@ -40,7 +40,7 @@ export interface CreateLaptopInput {
   employeeDepartment: string;
   price: number;
   currency: string;
-  receipt?: File | null;
+  receipt?: string | null;
   estimationUsefulLifeYear: string;
   depreciationEstimationDate: string;
   warrantyExpirationDate: string;
@@ -90,20 +90,9 @@ export async function getCurrentUserLaptops(
 }
 
 export async function createLaptop(input: CreateLaptopInput): Promise<string> {
-  const { receipt, ...laptopData } = input;
-  const formData = new FormData();
-
-  Object.entries(laptopData).forEach(([key, value]) => {
-    formData.append(key, String(value));
-  });
-
-  if (receipt) {
-    formData.append("receipt", receipt);
-  }
-
   const { data } = await apiClient.post<{ laptopId: string }>(
     "/api/laptops/create",
-    formData,
+    input,
   );
   return data.laptopId;
 }
