@@ -41,10 +41,9 @@ export function getUsers(pageNumber = 1, pageSize = 10) {
 
 export function searchUsers(search: string, pageNumber = 1, pageSize = 10) {
   return apiClient
-    .get<PaginatedUsers | User[]>(
-      `/api/user/searchString?=${encodeURIComponent(search)}`,
-      { params: { pageNumber, pageSize } },
-    )
+    .get<
+      PaginatedUsers | User[]
+    >(`/api/users/searchString?=${encodeURIComponent(search)}`, { params: { pageNumber, pageSize } })
     .then(({ data }) => {
       if (Array.isArray(data)) {
         return {

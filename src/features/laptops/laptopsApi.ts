@@ -74,7 +74,7 @@ export async function searchLaptops(
   pageSize = 20,
 ): Promise<PaginatedListOfUserLaptop> {
   const { data } = await apiClient.get<PaginatedListOfUserLaptop>(
-    `/api/laptop/?searchString=${encodeURIComponent(search)}`,
+    `/api/laptops/?searchString=${encodeURIComponent(search)}`,
     { params: { pageNumber, pageSize } },
   );
   return data;
