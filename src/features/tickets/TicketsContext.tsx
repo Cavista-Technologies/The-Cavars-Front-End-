@@ -7,12 +7,14 @@ import { useMembers } from "../users/MembersContext";
 import {
   addTicketComment,
   createTicket as createTicketApi,
+  getTicketDashboardMetrics,
   getCurrentUserTickets,
   getTickets,
   searchCurrentUserTickets,
   searchTickets,
   updateTicketStatus,
   type RemoteTicket,
+  type TicketDashboardMetrics,
 } from "./ticketsApi";
 import type { Ticket, TicketStatus } from "./types";
 
@@ -75,6 +77,9 @@ interface CreateTicketInput {
 
 interface TicketsContextValue {
   tickets: Ticket[];
+  metrics: TicketDashboardMetrics;
+  metricsError: string | null;
+  refreshMetrics: () => Promise<void>;
   status: TicketsState["status"];
   error: string | null;
   refresh: () => Promise<void>;
@@ -112,6 +117,13 @@ export function TicketsProvider({ children }: { children: React.ReactNode }) {
   });
   const pageRef = React.useRef(1);
   const searchRef = React.useRef(state.search);
+  const [metrics, setMetrics] = React.useState<TicketDashboardMetrics>({
+    total: 0,
+    open: 0,
+    claimed: 0,
+    resolved: 0,
+  });
+  const [metricsError, setMetricsError] = React.useState<string | null>(null);
 
   React.useEffect(() => {
     saveState(STORAGE_KEY, state);
@@ -202,10 +214,23 @@ export function TicketsProvider({ children }: { children: React.ReactNode }) {
     [authStatus, normalize, role],
   );
 
+  const refreshMetrics = React.useCallback(async () => {
+    if (authStatus !== "authenticated") return;
+
+    try {
+      const nextMetrics = await getTicketDashboardMetrics();
+      setMetrics(nextMetrics);
+      setMetricsError(null);
+    } catch (err) {
+      setMetricsError(getErrorMessage(err));
+    }
+  }, [authStatus]);
+
   React.useEffect(() => {
     pageRef.current = 1;
     refresh();
-  }, [refresh]);
+    void refreshMetrics();
+  }, [refresh, refreshMetrics]);
 
   const goToPage = React.useCallback(
     async (page: number) => {
@@ -228,10 +253,10 @@ export function TicketsProvider({ children }: { children: React.ReactNode }) {
   const createTicket = React.useCallback(
     async (input: CreateTicketInput) => {
       const ticketId = await createTicketApi(input.title, input.summary);
-      await refresh();
+      await Promise.all([refresh(), refreshMetrics()]);
       return ticketId;
     },
-    [refresh],
+    [refresh, refreshMetrics],
   );
 
   const claimTicket = React.useCallback(
@@ -261,6 +286,9 @@ export function TicketsProvider({ children }: { children: React.ReactNode }) {
   const value = React.useMemo(
     () => ({
       ...state,
+      metrics,
+      metricsError,
+      refreshMetrics,
       refresh,
       setSearch,
       goToPage,
@@ -271,6 +299,9 @@ export function TicketsProvider({ children }: { children: React.ReactNode }) {
     }),
     [
       state,
+      metrics,
+      metricsError,
+      refreshMetrics,
       refresh,
       setSearch,
       goToPage,

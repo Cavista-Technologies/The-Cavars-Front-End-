@@ -55,6 +55,13 @@ export interface UpdateLaptopInput {
   comment: string | null;
 }
 
+export interface LaptopDashboardMetrics {
+  total: number;
+  available: number;
+  assigned: number;
+  inRepair: number;
+}
+
 export async function getLaptops(
   pageNumber = 1,
   pageSize = 20,
@@ -97,6 +104,13 @@ export async function createLaptop(input: CreateLaptopInput): Promise<string> {
     input,
   );
   return data.laptopId;
+}
+
+export async function getLaptopDashboardMetrics(): Promise<LaptopDashboardMetrics> {
+  const { data } = await apiClient.get<LaptopDashboardMetrics>(
+    "/api/laptops/dashboard-metrics",
+  );
+  return data;
 }
 
 export async function updateLaptop(

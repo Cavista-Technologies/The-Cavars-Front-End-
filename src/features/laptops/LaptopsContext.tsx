@@ -6,10 +6,12 @@ import { loadState, saveState } from "../../lib/persist"
 import { useMembers } from "../users/MembersContext"
 import {
   createLaptop,
+  getLaptopDashboardMetrics,
   getLaptops,
   searchLaptops,
   updateLaptop,
   type CreateLaptopInput,
+  type LaptopDashboardMetrics,
   type RemoteUserLaptop,
 } from "./laptopsApi"
 import {
@@ -123,6 +125,9 @@ function reducer(state: LaptopsState, action: LaptopsAction): LaptopsState {
 
 interface LaptopsContextValue {
   laptops: Laptop[]
+  metrics: LaptopDashboardMetrics
+  metricsError: string | null
+  refreshMetrics: () => Promise<void>
   status: LaptopsState["status"]
   error: string | null
   refresh: (page?: number) => Promise<void>
@@ -163,6 +168,13 @@ export function LaptopsProvider({ children }: { children: React.ReactNode }) {
   })
   const pageRef = React.useRef(1)
   const searchRef = React.useRef(state.search)
+  const [metrics, setMetrics] = React.useState<LaptopDashboardMetrics>({
+    total: 0,
+    available: 0,
+    assigned: 0,
+    inRepair: 0,
+  })
+  const [metricsError, setMetricsError] = React.useState<string | null>(null)
 
   React.useEffect(() => {
     saveState(STORAGE_KEY, state)
@@ -249,10 +261,23 @@ export function LaptopsProvider({ children }: { children: React.ReactNode }) {
     }
   }, [normalize, role])
 
+  const refreshMetrics = React.useCallback(async () => {
+    if (role !== "it") return
+
+    try {
+      const nextMetrics = await getLaptopDashboardMetrics()
+      setMetrics(nextMetrics)
+      setMetricsError(null)
+    } catch (err) {
+      setMetricsError(getErrorMessage(err))
+    }
+  }, [role])
+
   React.useEffect(() => {
     pageRef.current = 1
     void refresh(1)
-  }, [refresh])
+    void refreshMetrics()
+  }, [refresh, refreshMetrics])
 
   const goToPage = React.useCallback(
     async (page: number) => {
@@ -274,9 +299,9 @@ export function LaptopsProvider({ children }: { children: React.ReactNode }) {
   const addLaptop = React.useCallback(
     async (input: CreateLaptopInput) => {
       await createLaptop(input)
-      await refresh()
+      await Promise.all([refresh(), refreshMetrics()])
     },
-    [refresh],
+    [refresh, refreshMetrics],
   )
 
   const assignLaptop = React.useCallback(
@@ -341,8 +366,32 @@ export function LaptopsProvider({ children }: { children: React.ReactNode }) {
   )
 
   const value = React.useMemo(
-    () => ({ ...state, refresh, goToPage, setSearch, addLaptop, assignLaptop, unassignLaptop, setLaptopStatus }),
-    [state, refresh, goToPage, setSearch, addLaptop, assignLaptop, unassignLaptop, setLaptopStatus],
+    () => ({
+      ...state,
+      metrics,
+      metricsError,
+      refreshMetrics,
+      refresh,
+      goToPage,
+      setSearch,
+      addLaptop,
+      assignLaptop,
+      unassignLaptop,
+      setLaptopStatus,
+    }),
+    [
+      state,
+      metrics,
+      metricsError,
+      refreshMetrics,
+      refresh,
+      goToPage,
+      setSearch,
+      addLaptop,
+      assignLaptop,
+      unassignLaptop,
+      setLaptopStatus,
+    ],
   )
 
   return <LaptopsContext.Provider value={value}>{children}</LaptopsContext.Provider>

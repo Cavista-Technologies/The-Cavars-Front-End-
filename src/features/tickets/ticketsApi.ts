@@ -30,6 +30,13 @@ export interface PaginatedListOfTicket {
   hasNextPage: boolean;
 }
 
+export interface TicketDashboardMetrics {
+  total: number;
+  open: number;
+  claimed: number;
+  resolved: number;
+}
+
 export async function getTickets(
   pageNumber = 1,
   pageSize = 20,
@@ -93,6 +100,13 @@ export async function createTicket(
     { description, comment },
   );
   return data.ticketId;
+}
+
+export async function getTicketDashboardMetrics(): Promise<TicketDashboardMetrics> {
+  const { data } = await apiClient.get<TicketDashboardMetrics>(
+    "/api/ticketss/dashboard-metrics",
+  );
+  return data;
 }
 
 export async function addTicketComment(

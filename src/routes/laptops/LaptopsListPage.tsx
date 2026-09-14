@@ -14,6 +14,7 @@ export function Component() {
   const role = useRole();
   const {
     laptops,
+    metrics,
     pageIndex,
     totalPages,
     hasPreviousPage,
@@ -30,14 +31,6 @@ export function Component() {
     return <Navigate to="/tickets" replace />;
   }
 
-  const counts = {
-    available: laptops.filter(
-      (l) => l.status === "available" || l.status === "unassigned",
-    ).length,
-    assigned: laptops.filter((l) => l.status === "assigned").length,
-    inRepair: laptops.filter((l) => l.status === "in-repair").length,
-  };
-
   return (
     <Box>
       <Box mb="6">
@@ -52,23 +45,23 @@ export function Component() {
       <HStack gap="4" mb="6" wrap="wrap">
         <StatCard
           label="Total"
-          value={laptops.length}
-          data={[5, 6, 6, 7, 7, laptops.length]}
+          value={metrics.total}
+          data={[5, 6, 6, 7, 7, metrics.total]}
         />
         <StatCard
           label="Available"
-          value={counts.available}
-          data={[2, 2, 3, 2, 3, counts.available]}
+          value={metrics.available}
+          data={[2, 2, 3, 2, 3, metrics.available]}
         />
         <StatCard
           label="Assigned"
-          value={counts.assigned}
-          data={[3, 3, 4, 4, 4, counts.assigned]}
+          value={metrics.assigned}
+          data={[3, 3, 4, 4, 4, metrics.assigned]}
         />
         <StatCard
           label="In repair"
-          value={counts.inRepair}
-          data={[0, 1, 1, 1, 1, counts.inRepair]}
+          value={metrics.inRepair}
+          data={[0, 1, 1, 1, 1, metrics.inRepair]}
         />
       </HStack>
 

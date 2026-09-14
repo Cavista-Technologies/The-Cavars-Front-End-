@@ -23,6 +23,7 @@ export function Component() {
   const role = useRole();
   const {
     tickets,
+    metrics,
     pageIndex,
     totalPages,
     hasPreviousPage,
@@ -69,12 +70,6 @@ export function Component() {
     {},
   );
 
-  const counts = {
-    open: scoped.filter((t) => t.status === "open").length,
-    claimed: scoped.filter((t) => t.status === "claimed").length,
-    resolved: scoped.filter((t) => t.status === "resolved").length,
-  };
-
   // `laptops` (the full IT-only inventory) is empty for non-IT users — fall back to their own
   // laptop from the current-user API, which is the only laptop a non-IT ticket can reference.
   // Note: `laptopId` is `userLaptopID` (a real UserLaptop record id, matching `user.laptop.id`) —
@@ -100,23 +95,23 @@ export function Component() {
       <HStack gap="4" mb="6" wrap="wrap">
         <StatCard
           label="Open"
-          value={counts.open}
-          data={[2, 3, 2, 4, 3, counts.open]}
+          value={metrics.open}
+          data={[2, 3, 2, 4, 3, metrics.open]}
         />
         <StatCard
           label="Claimed"
-          value={counts.claimed}
-          data={[1, 2, 1, 2, 3, counts.claimed]}
+          value={metrics.claimed}
+          data={[1, 2, 1, 2, 3, metrics.claimed]}
         />
         <StatCard
           label="Resolved"
-          value={counts.resolved}
-          data={[3, 4, 5, 4, 6, counts.resolved]}
+          value={metrics.resolved}
+          data={[3, 4, 5, 4, 6, metrics.resolved]}
         />
         <StatCard
           label="Total"
-          value={scoped.length}
-          data={[4, 6, 5, 7, 6, scoped.length]}
+          value={metrics.total}
+          data={[4, 6, 5, 7, 6, metrics.total]}
         />
       </HStack>
 
