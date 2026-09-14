@@ -40,7 +40,23 @@ export function getUsers(pageNumber = 1, pageSize = 10) {
 }
 
 export function searchUsers(search: string, pageNumber = 1, pageSize = 10) {
-  return getUsersPage("/api/users/search", pageNumber, pageSize, search);
+  return apiClient
+    .get<PaginatedUsers | User[]>(
+      `/api/user/searchString?=${encodeURIComponent(search)}`,
+      { params: { pageNumber, pageSize } },
+    )
+    .then(({ data }) => {
+      if (Array.isArray(data)) {
+        return {
+          pageIndex: pageNumber,
+          totalPages: 1,
+          item: data,
+          hasPreviousPage: pageNumber > 1,
+          hasNextPage: false,
+        };
+      }
+      return data;
+    });
 }
 
 export async function getCurrentUser(): Promise<CurrentUser> {
