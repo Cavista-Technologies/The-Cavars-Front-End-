@@ -32,12 +32,14 @@ export function SearchToolbar({
         <InputGroup maxW="sm" startElement={<LuSearch />}>
           <Input placeholder={placeholder} value={value} onChange={(e) => onChange(e.target.value)} />
         </InputGroup>
-        <Button type="submit" colorPalette="orange">
+        <Button type="submit" variant="outline">
           <LuSearch /> Search
         </Button>
-        <Button type="button" variant="outline" onClick={onClear}>
-          <LuX /> Clear search
-        </Button>
+        {value.length > 0 && (
+          <Button type="button" variant="ghost" onClick={onClear}>
+            <LuX /> Clear search
+          </Button>
+        )}
       </HStack>
       {onAdd && (
         <Button type="button" colorPalette="orange" onClick={onAdd}>
