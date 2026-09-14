@@ -37,6 +37,7 @@ export function Component() {
   const [submitting, setSubmitting] = React.useState(false)
 
   const [assetName, setAssetName] = React.useState("")
+  const [laptopNumber, setLaptopNumber] = React.useState("")
   const [model, setModel] = React.useState("")
   const [comment, setComment] = React.useState("")
   const [assetLocation, setAssetLocation] = React.useState("")
@@ -55,11 +56,12 @@ export function Component() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!assetName.trim() || !model.trim() || !comment.trim()) return
+    if (!laptopNumber.trim() || !assetName.trim() || !model.trim() || !comment.trim()) return
     setSubmitting(true)
     try {
       const receiptDataUrl = receipt ? await fileToDataUrl(receipt) : null
       await addLaptop({
+        laptopNumber: laptopNumber.trim(),
         assetName: assetName.trim(),
         model: model.trim(),
         comment: comment.trim(),
@@ -92,6 +94,10 @@ export function Component() {
           </DialogHeader>
           <DialogBody>
             <Stack gap="4">
+              <Field.Root required>
+                <Field.Label>Laptop number</Field.Label>
+                <Input value={laptopNumber} onChange={(e) => setLaptopNumber(e.target.value)} placeholder="e.g. LAP-001" />
+              </Field.Root>
               <Field.Root required>
                 <Field.Label>Asset name</Field.Label>
                 <Input value={assetName} onChange={(e) => setAssetName(e.target.value)} placeholder="e.g. MacBook Pro 14" />

@@ -180,6 +180,7 @@ export function LaptopsProvider({ children }: { children: React.ReactNode }) {
         const owner = r.userId ? users.find((u) => u.id === r.userId) : undefined
         return {
           id: r.id,
+          laptopNumber: r.laptopNumber,
           assetName: r.assetName,
           model: r.model,
           comment: r.comment,

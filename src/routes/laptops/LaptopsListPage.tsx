@@ -96,6 +96,7 @@ export function Component() {
         <Table.Root size="sm">
           <Table.Header>
             <Table.Row>
+              <Table.ColumnHeader>Laptop number</Table.ColumnHeader>
               <Table.ColumnHeader>Asset name</Table.ColumnHeader>
               <Table.ColumnHeader>Model</Table.ColumnHeader>
               <Table.ColumnHeader>Department</Table.ColumnHeader>
@@ -113,7 +114,8 @@ export function Component() {
                 bg={params.id === laptop.id ? "colorPalette.subtle" : undefined}
                 _hover={{ bg: "bg.muted" }}
               >
-                <Table.Cell fontWeight="medium">{laptop.assetName}</Table.Cell>
+                <Table.Cell fontWeight="medium">{laptop.laptopNumber || "—"}</Table.Cell>
+                <Table.Cell>{laptop.assetName}</Table.Cell>
                 <Table.Cell>{laptop.model}</Table.Cell>
                 <Table.Cell>{laptop.employeeDepartment || "—"}</Table.Cell>
                 <Table.Cell>{laptop.assignedToName ?? "-"}</Table.Cell>
@@ -133,7 +135,7 @@ export function Component() {
             ))}
             {laptops.length === 0 && (
               <Table.Row>
-                <Table.Cell colSpan={5}>
+                <Table.Cell colSpan={6}>
                   <Text
                     color="fg.muted"
                     fontSize="sm"

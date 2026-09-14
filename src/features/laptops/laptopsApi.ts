@@ -4,6 +4,7 @@ import type { RemoteLaptopHistory } from "./types";
 export interface RemoteUserLaptop {
   id: string;
   userId: string | null;
+  laptopNumber: string;
   assetName: string;
   model: string;
   comment: string;
@@ -33,6 +34,7 @@ export interface PaginatedListOfUserLaptop {
 }
 
 export interface CreateLaptopInput {
+  laptopNumber: string;
   assetName: string;
   model: string;
   comment: string;
