@@ -71,7 +71,7 @@ export async function searchCurrentUserTickets(
   pageSize = 20,
 ): Promise<PaginatedListOfTicket> {
   const { data } = await apiClient.get<PaginatedListOfTicket>(
-    `/api/tickets/current-user/searchString?=${encodeURIComponent(search)}`,
+    `/api/tickets/current-user/?searchString=${encodeURIComponent(search)}`,
     { params: { pageNumber, pageSize } },
   );
   return data;
