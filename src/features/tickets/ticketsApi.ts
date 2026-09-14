@@ -104,7 +104,7 @@ export async function createTicket(
 
 export async function getTicketDashboardMetrics(): Promise<TicketDashboardMetrics> {
   const { data } = await apiClient.get<TicketDashboardMetrics>(
-    "/api/ticketss/dashboard-metrics",
+    "/api/tickets/dashboard-metric",
   );
   return data;
 }

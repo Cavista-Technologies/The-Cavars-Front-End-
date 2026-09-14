@@ -108,7 +108,7 @@ export async function createLaptop(input: CreateLaptopInput): Promise<string> {
 
 export async function getLaptopDashboardMetrics(): Promise<LaptopDashboardMetrics> {
   const { data } = await apiClient.get<LaptopDashboardMetrics>(
-    "/api/laptops/dashboard-metrics",
+    "/api/laptops/dashboard-metric",
   );
   return data;
 }
